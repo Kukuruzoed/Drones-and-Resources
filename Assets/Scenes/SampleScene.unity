@@ -1049,7 +1049,7 @@ MonoBehaviour:
     baseTransform: {fileID: 68304841}
     resourcesCollected: 0
   spawnRadius: 5
-  avoidanceRadius: 5
+  avoidanceRadius: 2
   droneCountSlider: {fileID: 1179586327}
   droneSpeedSlider: {fileID: 345779721}
   spawnRateInput: {fileID: 175450381}
