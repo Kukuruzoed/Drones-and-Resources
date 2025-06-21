@@ -1,0 +1,50 @@
+# Unity specific
+*.meta binary
+*.unity binary
+*.prefab binary
+*.asset binary
+*.mat binary
+*.fbx binary
+*.obj binary
+*.blend binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.tga binary
+*.psd binary
+*.exr binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.aif binary
+*.fbx -text diff
+*.obj -text diff
+*.fbx merge=unityyamlmerge eol=lf
+*.obj merge=unityyamlmerge eol=lf
+
+# Text files should use LF line endings
+*.sh text eol=lf
+*.cs text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.gitattributes text eol=lf
+*.gitignore text eol=lf
+
+# C# scripts
+*.cs text diff=csharp
+
+# Force Unix line endings for all text files
+* text=auto eol=lf
+
+# Explicitly declare binary files
+*.dll binary
+*.exe binary
+*.so binary
+*.dylib binary
+*.bundle binary
+*.a binary
+*.jar binary
+*.class binary
