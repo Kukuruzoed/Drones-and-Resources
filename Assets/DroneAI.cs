@@ -57,44 +57,48 @@ public class DroneAI : MonoBehaviour
                 break;
 
             case DroneState.MovingToResource:
-                if (targetResource == null)
                 {
-                    state = DroneState.Searching;
+                    if (targetResource == null)
+                    {
+                        state = DroneState.Searching;
+                        break;
+                    }
+
+                    Vector3 targetPos = targetResource.transform.position;
+                    Vector3 toTarget = (targetPos - transform.position).normalized;
+
+                    Vector3 avoidance = simulation.GetAvoidanceForce(transform.position, gameObject);
+                    float avoidanceWeight = 5f; // усилие отталкивани€, можно вынести в public
+
+                    Vector3 desiredDir = (toTarget + avoidance * avoidanceWeight).normalized;
+
+                    if (desiredDir != Vector3.zero)
+                    {
+                        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * 5f);
+                    }
+
+                    transform.position += desiredDir * moveSpeed * Time.deltaTime;
+
+
+                    if (showPath)
+                    {
+                        pathPoints[0] = transform.position;
+                        pathPoints[1] = targetPos;
+                        pathRenderer.positionCount = 2;
+                        pathRenderer.SetPositions(pathPoints);
+                    }
+                    else
+                    {
+                        pathRenderer.positionCount = 0;
+                    }
+
+                    if (Vector3.Distance(transform.position, targetPos) < 0.5f)
+                    {
+                        state = DroneState.Collecting;
+                        collectionTimer = collectionTime;
+                    }
                     break;
                 }
-
-                Vector3 targetPos = targetResource.transform.position;
-                // ѕолучаем вектор избегани€ дл€ всех дронов, кроме текущего
-                Vector3 toTarget = (targetPos - transform.position).normalized;
-                Vector3 avoidance = simulation.GetAvoidanceOffset(transform.position, gameObject);
-
-                Vector3 finalDir = (toTarget + avoidance * avoidanceStrength).normalized;
-
-                if (finalDir != Vector3.zero)
-                    transform.forward = finalDir;
-
-                transform.position += finalDir * moveSpeed * Time.deltaTime;
-
-
-                if (showPath)
-                {
-                    pathPoints[0] = transform.position;
-                    pathPoints[1] = targetPos;
-                    pathRenderer.positionCount = 2;
-                    pathRenderer.SetPositions(pathPoints);
-                }
-                else
-                {
-                    pathRenderer.positionCount = 0;
-                }
-
-                if (Vector3.Distance(transform.position, targetPos) < 0.5f)
-                {
-                    state = DroneState.Collecting;
-                    collectionTimer = collectionTime;
-                }
-                break;
-
             case DroneState.Collecting:
                 collectionTimer -= Time.deltaTime;
                 if (collectionTimer <= 0)
@@ -120,33 +124,38 @@ public class DroneAI : MonoBehaviour
                 break;
 
             case DroneState.ReturningToBase:
-                Vector3 basePos = faction.baseTransform.position;
-
-                Vector3 toBaseTarget = (basePos - transform.position).normalized;
-                Vector3 toBaseAvoidance = simulation.GetAvoidanceOffset(transform.position, gameObject);
-
-                Vector3 toBaseFinalDir = (toBaseTarget + toBaseAvoidance * avoidanceStrength).normalized;
-
-                if (toBaseFinalDir != Vector3.zero)
-                    transform.forward = toBaseFinalDir;
-
-                transform.position += toBaseFinalDir * moveSpeed * Time.deltaTime;
-
-
-                if (showPath)
                 {
-                    pathPoints[0] = transform.position;
-                    pathPoints[1] = basePos;
-                    pathRenderer.positionCount = 2;
-                    pathRenderer.SetPositions(pathPoints);
-                }
+                    Vector3 basePos = faction.baseTransform.position;
 
-                if (Vector3.Distance(transform.position, basePos) < 1f)
-                {
-                    state = DroneState.Delivering;
-                }
-                break;
+                    Vector3 toTarget = (basePos - transform.position).normalized;
 
+                    Vector3 avoidance = simulation.GetAvoidanceForce(transform.position, gameObject);
+                    float avoidanceWeight = 5f; // усилие отталкивани€, можно вынести в public
+
+                    Vector3 desiredDir = (toTarget + avoidance * avoidanceWeight).normalized;
+
+                    if (desiredDir != Vector3.zero)
+                    {
+                        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredDir), Time.deltaTime * 5f);
+                    }
+
+                    transform.position += desiredDir * moveSpeed * Time.deltaTime;
+
+
+                    if (showPath)
+                    {
+                        pathPoints[0] = transform.position;
+                        pathPoints[1] = basePos;
+                        pathRenderer.positionCount = 2;
+                        pathRenderer.SetPositions(pathPoints);
+                    }
+
+                    if (Vector3.Distance(transform.position, basePos) < 1f)
+                    {
+                        state = DroneState.Delivering;
+                    }
+                    break;
+                }
             case DroneState.Delivering:
                 if (hasResource && targetResource != null)
                 {

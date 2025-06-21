@@ -196,31 +196,25 @@ public class ResourceDrone : MonoBehaviour
         return nearest;
     }
 
-    public Vector3 GetAvoidanceOffset(Vector3 position, GameObject currentDrone)
+    public Vector3 GetAvoidanceForce(Vector3 position, GameObject currentDrone)
     {
-        Vector3 offset = Vector3.zero;
-        int count = 0;
+        Vector3 force = Vector3.zero;
 
         foreach (var drone in drones)
         {
             if (drone == null || drone == currentDrone) continue;
 
             float dist = Vector3.Distance(position, drone.transform.position);
-            if (dist < avoidanceRadius)
+            if (dist < avoidanceRadius && dist > 0.01f)
             {
-                // „ем ближе дрон Ч тем сильнее отталкиваем
-                float strength = (avoidanceRadius - dist) / avoidanceRadius; // от 0 до 1
-                offset += (position - drone.transform.position).normalized * strength;
-                count++;
+                // „ем ближе объект, тем больше сила отталкивани€ (обратнопропорциональна квадрату рассто€ни€)
+                Vector3 away = (position - drone.transform.position).normalized;
+                float strength = 1f / (dist * dist); // экспоненциально растЄт при приближении
+                force += away * strength;
             }
         }
 
-        if (count > 0)
-        {
-            offset /= count;
-        }
-
-        return offset;
+        return force;
     }
 
 
